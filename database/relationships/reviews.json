@@ -1,0 +1,23 @@
+[
+  {
+    "articleId": "7e0a00b6-bb15-4a1c-803c-d969352ae7b0",
+    "authorId": "2d884569-d4bc-4375-bdb1-983f21584bc0",
+    "comment": "I love this article",
+    "id": "efcb97af-9aed-4b7a-b65d-1ed197980cfb",
+    "rate": 4.5
+  },
+  {
+    "articleId": "85b45074-baf9-4f65-9db2-6c9f59b57a08",
+    "authorId": "2d884569-d4bc-4375-bdb1-983f21584bc0",
+    "comment": "need more details about this article",
+    "id": "55c09bc1-1bce-4996-b825-cdc372092f88",
+    "rate": 3
+  },
+  {
+    "articleId": "85b45074-baf9-4f65-9db2-6c9f59b57a08",
+    "authorId": "2d884569-d4bc-4375-bdb1-983f21584bc0",
+    "comment": "poor!",
+    "id": "54852fbe-0b32-406f-be4d-81ea821c80bb",
+    "rate": 1
+  }
+]

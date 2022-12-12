@@ -1,0 +1,31 @@
+{
+  "id": "2d884569-d4bc-4375-bdb1-983f21584bc0",
+  "name": "Jane",
+  "surname": "Doe",
+  "birthDate": "1980-01-01",
+  "email": "janedoe@mail.com",
+  "phone": "+1 555 123 4567",
+  "address": {
+    "street": "123 Main Street",
+    "city": "New York",
+    "state": "NY",
+    "zip": "10001"
+  },
+  "company": null,
+  "education": [
+    {
+      "school": "University of New York",
+      "degree": "Bachelor of Science",
+      "field": "Computer Science",
+      "start": "2000-01-01",
+      "end": "2004-01-01"
+    },
+    {
+      "school": "University of New York",
+      "degree": "Master of Science",
+      "field": "Computer Science",
+      "start": "2004-01-01",
+      "end": "2006-01-01"
+    }
+  ]
+}

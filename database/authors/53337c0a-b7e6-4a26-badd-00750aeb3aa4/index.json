@@ -1,0 +1,25 @@
+{
+  "id": "53337c0a-b7e6-4a26-badd-00750aeb3aa4",
+  "name": "John",
+  "surname": "Doe",
+  "birthDate": "1990-01-01",
+  "email": "johndoe@mail.com",
+  "phone": "+123456789",
+  "address": {
+    "street": "Street 1",
+    "city": "City 1",
+    "state": "State 1",
+    "country": "Country 1",
+    "zip": "12345"
+  },
+  "company": {
+    "name": "Company 1",
+    "address": {
+      "street": "Street 2",
+      "city": "City 2",
+      "state": "State 2",
+      "country": "Country 2",
+      "zip": "12345"
+    }
+  }
+}
