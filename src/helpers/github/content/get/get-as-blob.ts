@@ -20,7 +20,10 @@ const getContentAsBlob = async (config: any, sha: string): Promise<GitHubReturnA
 
     return body;
   } catch (error) {
-    console.error(`Error getting content as blob: ${error.message}`);
+    const message = `Error in getContentAsBlob: ${error.message}`;
+    console.error(message);
+    // TODO: apply error handling
+    // throw new Error(message, { cause: error });
     throw error;
   }
 };

@@ -25,7 +25,10 @@ const getContent = async <T = any>(config: any, branch: string, path: string): P
       sha: shaAsBlob,
     };
   } catch (error) {
-    console.error(`Error getting content: ${error.message}`);
+    const message = `Error in getContent: ${error.message}`;
+    console.error(message);
+    // TODO: apply error handling
+    // throw new Error(message, { cause: error });
     throw error;
   }
 };

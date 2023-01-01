@@ -20,7 +20,10 @@ const tryGetContent = async (config: any, branch: string, path: string): Promise
 
     return body;
   } catch (error) {
-    console.error(`Error getting tree: ${error.message}`);
+    const message = `Error in tryGetContent: ${error.message}`;
+    console.error(message);
+    // TODO: apply error handling
+    // throw new Error(message, { cause: error });
     throw error;
   }
 };

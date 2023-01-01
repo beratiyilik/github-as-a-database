@@ -39,7 +39,10 @@ const createOrUpdateContent = async (
 
     return returnBody.content.sha;
   } catch (error) {
-    console.error(`Error creating or updating content: ${error.message}`);
+    const message = `Error in createOrUpdateContent: ${error.message}`;
+    console.error(message);
+    // TODO: apply error handling
+    // throw new Error(message, { cause: error });
     throw error;
   }
 };

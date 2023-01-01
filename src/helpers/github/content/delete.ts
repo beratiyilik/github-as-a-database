@@ -20,7 +20,10 @@ const deleteContent = async (config: any, branch: string, path: string, user: Au
 
     await httpDelete<GitHubDeleteContent>(options, body);
   } catch (error) {
-    console.error(`Error deleting content: ${error.message}`);
+    const message = `Error in deleteContent: ${error.message}`;
+    console.error(message);
+    // TODO: apply error handling
+    // throw new Error(message, { cause: error });
     throw error;
   }
 };

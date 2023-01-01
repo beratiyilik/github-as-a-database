@@ -42,7 +42,10 @@ const getAllContentAsGzip = async (config: any, branch: string): Promise<GitHubR
       content: body.filter(filterOnlyJsonAndNotEmpty).map(mapTo),
     };
   } catch (error) {
-    console.error(`error in getAllAsGzip: ${error.message}`);
+    const message = `Error in getAllContentAsGzip: ${error.message}`;
+    console.error(message);
+    // TODO: apply error handling
+    // throw new Error(message, { cause: error });
     throw error;
   }
 };

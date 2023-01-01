@@ -15,7 +15,10 @@ const getContentAsBlobByPath = async (config: any, branch: string, path: string)
 
     return content;
   } catch (error) {
-    console.error(`Error getting content as blob by path: ${error.message}`);
+    const message = `Error in getContentAsBlobByPath: ${error.message}`;
+    console.error(message);
+    // TODO: apply error handling
+    // throw new Error(message, { cause: error });
     throw error;
   }
 };
