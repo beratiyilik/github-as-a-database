@@ -1,0 +1,9 @@
+{
+  "id": "87cc7bf2-17fc-4b67-ae80-5c226e234a82",
+  "name": "Road to MVP",
+  "body": "The Road to MVP is a series of articles that will help you get started with the MVP pattern in Android. The series is divided into 3 parts: Part 1: The Model-View-Presenter Pattern Part 2: The Model-View-Presenter Pattern in Android Part 3: The Model-View-Presenter Pattern in Android with Dagger 2",
+  "authorId": "53337c0a-b7e6-4a26-badd-00750aeb3aa4",
+  "createdAt": "2016-03-01T00:00:00.000Z",
+  "updatedAt": "2016-03-01T00:00:00.000Z",
+  "tagList": ["software", "mvp", "career"]
+}
