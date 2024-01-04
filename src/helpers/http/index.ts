@@ -1,46 +1,48 @@
 import { https } from 'follow-redirects';
-import httpGet from './get';
 import httpRequest from './request';
 import { HttpDelete, HttpHead, HttpPatch, HttpPost, HttpPut, IResponse } from './types';
 
-const httpPost: HttpPost = async <Type>(options: https.RequestOptions, data: any): Promise<IResponse<Type>> =>
+const httpGet = async <Type>(options: https.RequestOptions, body?: any): Promise<IResponse<Type>> =>
+  httpRequest<Type>({ ...options, method: 'GET' }, body);
+
+const httpPost: HttpPost = async <Type>(options: https.RequestOptions, body: any): Promise<IResponse<Type>> =>
   httpRequest(
     {
       ...options,
       method: 'POST',
     },
-    data,
+    body,
   );
 
-const httpPut: HttpPut = async <Type>(options: https.RequestOptions, data: any): Promise<IResponse<Type>> =>
+const httpPut: HttpPut = async <Type>(options: https.RequestOptions, body: any): Promise<IResponse<Type>> =>
   httpRequest(
     {
       ...options,
       method: 'PUT',
     },
-    data,
+    body,
   );
 
-const httpPatch: HttpPatch = async <Type>(options: https.RequestOptions, data: any): Promise<IResponse<Type>> =>
+const httpPatch: HttpPatch = async <Type>(options: https.RequestOptions, body: any): Promise<IResponse<Type>> =>
   httpRequest(
     {
       ...options,
       method: 'PATCH',
     },
-    data,
+    body,
   );
 
-const httpDelete: HttpDelete = async <Type>(options: https.RequestOptions, data?: any): Promise<IResponse<Type>> =>
+const httpDelete: HttpDelete = async <Type>(options: https.RequestOptions, body?: any): Promise<IResponse<Type>> =>
   httpRequest(
     {
       ...options,
       method: 'DELETE',
     },
-    data,
+    body,
   );
 
 const httpHead: HttpHead = async <Type>(options: https.RequestOptions): Promise<IResponse<Type>> =>
-  httpGet({
+  httpRequest({
     ...options,
     method: 'HEAD',
   });

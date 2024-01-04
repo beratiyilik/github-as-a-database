@@ -14,6 +14,7 @@ export interface IResponse<Type = string> {
   statusMessage?: string;
   headers: Headers;
   body?: Type;
+  error?: any | Error | IHttpError;
 }
 
 export type HttpGet = <Type>(options: https.RequestOptions) => Promise<IResponse<Type>>;
@@ -28,6 +29,14 @@ export interface IHttpError extends Error {
   statusCode: number;
   statusMessage?: string;
   mapToError: (originalErrorBody?: any) => Error;
+}
+
+export interface IFileOptions {
+  name: string;
+  size: number;
+  type: string;
+  mode: number;
+  mtime: number;
 }
 
 export interface IFile {

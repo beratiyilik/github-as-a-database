@@ -5,8 +5,9 @@ import { unlink } from 'fs/promises';
 import path from 'path';
 import tar from 'tar-stream';
 import { v4 as uuidv4 } from 'uuid';
-import { IFile } from './types';
+import { IFileOptions, IFile } from './types';
 import { toObject } from '@/utils/json';
+import { RejectError } from './http.errors';
 
 const ROOT_DIR = process.cwd();
 const TEMP_DIR = `${ROOT_DIR}/tmp`;
@@ -18,7 +19,7 @@ class File implements IFile {
   mode: number;
   mtime: number;
   chunks: Array<any>;
-  constructor({ name, size, type, mode, mtime }) {
+  constructor({ name, size, type, mode, mtime }: IFileOptions) {
     this.name = name;
     this.size = size;
     this.type = type;
@@ -28,7 +29,7 @@ class File implements IFile {
   }
   getFileExtension = () => this.name.split('.').pop();
   getPath = () => this.name.split('/').slice(1).join('/'); // strip repo name and HEAD id
-  addChunk = chunk => this.chunks.push(chunk);
+  addChunk = (chunk: any) => this.chunks.push(chunk);
   getContentAsBinary = () => Buffer.concat(this.chunks);
   getContentAsText = () => this.getContentAsBinary().toString('utf8');
   getContentAsObject = () => toObject(this.getContentAsText());
@@ -36,19 +37,24 @@ class File implements IFile {
 
 const generateFilename = (): string => `${TEMP_DIR}/${uuidv4()}.tar.gz`;
 
-const ensureDirectoryExistence = (filename: string) => {
-  const dirname = path.dirname(filename);
-  if (fs.existsSync(dirname)) return true;
-  ensureDirectoryExistence(dirname);
+const checkDirectoryExists = (dirname: string) => fs.existsSync(dirname);
+
+const createDirectory = (dirname: string) => {
+  if (checkDirectoryExists(dirname)) return;
+  createDirectory(path.dirname(dirname));
   fs.mkdirSync(dirname);
 };
+
+const createDirectoryIfNotExists = (filename: string) => createDirectory(path.dirname(filename));
 
 const downloadFile = async (response: https.IncomingMessage, filename: string): Promise<void> =>
   new Promise((resolve: Function, reject: Function) => {
     const stream = fs.createWriteStream(filename);
-    response.on('end', () => resolve());
-    response.on('error', error => reject(error));
-    stream.on('finish', () => stream.close());
+    stream.on('error', (error: Error) => reject(error));
+    stream.on('finish', () => {
+      stream.close();
+      resolve();
+    });
     response.pipe(stream);
   });
 
@@ -58,54 +64,62 @@ const readFile = async (filename: string): Promise<IFile[]> =>
     const extract = tar.extract();
     const files: IFile[] = [];
 
-    extract.on('entry', function (header, stream, next) {
-      // header is the tar header
-      // stream is the content body (might be an empty stream)
-      // call next when you are done with this entry
+    readStream.on('error', (error: Error) => reject(error));
 
-      files.push(new File(header));
+    extract.on('entry', function (header: any, stream: any, next: any) {
+      const file = new File(header);
 
-      stream.on('data', function (chunk) {
-        // decompression chunk as it is generated
+      files.push(file);
 
-        const file = files.find(({ name }) => name === header.name);
+      stream.on('data', function (chunk: any) {
         file.addChunk(chunk);
       });
 
       stream.on('end', function () {
-        next(); // ready for next entry
+        next();
       });
 
-      stream.resume(); // just auto drain the stream
+      stream.on('error', reject);
+
+      stream.resume();
     });
 
     extract.on('finish', function () {
-      // all entries read
       resolve(files);
     });
+
+    extract.on('error', reject);
 
     readStream.pipe(zlib.createGunzip()).pipe(extract);
   });
 
 const removeFile = async (filename: string): Promise<void> => unlink(filename);
 
-const extractGzipToFilesResponse = async (response: https.IncomingMessage, resolve: Function, reject: Function): Promise<any> => {
+const extractXGzipToFilesResponse = async (response: https.IncomingMessage, resolve: Function, reject: Function): Promise<any> => {
+  const { statusCode, statusMessage, headers } = response;
   try {
-    const { statusCode, statusMessage, headers } = response;
     const filename = generateFilename();
-    ensureDirectoryExistence(filename);
+    createDirectoryIfNotExists(filename);
     await downloadFile(response, filename);
     const files = await readFile(filename);
+    await removeFile(filename);
     resolve({
       statusCode,
       statusMessage,
       headers,
       body: files,
     });
-    removeFile(filename);
   } catch (error) {
-    reject(error);
+    // new Error('Error in extractXGzipToFilesResponse', { cause: error })
+    reject(
+      new RejectError<any>(`Error in extractXGzipToFilesResponse: ${error?.message}`, {
+        statusCode,
+        statusMessage,
+        headers,
+        error,
+      }),
+    );
   }
 };
 
-export default extractGzipToFilesResponse;
+export default extractXGzipToFilesResponse;

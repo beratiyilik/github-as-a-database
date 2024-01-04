@@ -12,9 +12,19 @@ export const hasError = (statusCode: number): boolean => hasClientError(statusCo
 
 export const hasHeader = (headers: Headers, headerName: string): boolean => headers[headerName] !== undefined;
 
+export const isTransferEncodingChunked = (headers: Headers): boolean =>
+  hasHeader(headers, 'transfer-encoding') && headers['transfer-encoding'].includes('chunked');
+
 export const isContentTypeJSON = (headers: Headers): boolean =>
   hasHeader(headers, 'content-type') && headers['content-type'].includes('application/json');
+export const isContentTypeOctetStream = (headers: Headers): boolean =>
+  hasHeader(headers, 'content-type') && headers['content-type'].includes('application/octet-stream');
 export const isContentTypeXGzip = (headers: Headers): boolean =>
   hasHeader(headers, 'content-type') && headers['content-type'].includes('application/x-gzip');
+
 export const isContentEncodingGzip = (headers: Headers): boolean =>
   hasHeader(headers, 'content-encoding') && headers['content-encoding'].includes('gzip');
+export const isContentEncodingDeflate = (headers: Headers): boolean =>
+  hasHeader(headers, 'content-encoding') && headers['content-encoding'].includes('deflate');
+export const isContentEncodingBr = (headers: Headers): boolean =>
+  hasHeader(headers, 'content-encoding') && headers['content-encoding'].includes('br');
