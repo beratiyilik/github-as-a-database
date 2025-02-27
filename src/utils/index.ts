@@ -6,3 +6,4 @@ export { default as safePromiseHandler } from './safe-promise-handler';
 export * from './security';
 export * from './util';
 export { default as validateEnv } from './validateEnv';
+import './string.extensions';

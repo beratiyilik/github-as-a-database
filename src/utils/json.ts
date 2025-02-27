@@ -1,74 +1,77 @@
-export const toJSON = (data: any): string => jsonStableStringify(data, { space: 2 });
+// Type definition for the custom comparer function
+type Comparer = (a: string, b: string) => number;
 
-export const toObject = <Type = any>(data: string): Type => <Type>JSON.parse(data);
+// Type definition for the custom replacer function
+type Replacer = (key: string, value: any) => any | (number | string)[] | null;
 
-const jsonStableStringify = (obj: any, opts: any): any => {
-  if (!opts) opts = {};
-  if (typeof opts === 'function') opts = { cmp: opts };
-  let space = opts.space || '';
-  if (typeof space === 'number') space = Array(space + 1).join(' ');
-  const cycles = typeof opts.cycles === 'boolean' ? opts.cycles : false;
-  const replacer =
-    opts.replacer ||
-    function (_key: any, value: any): any {
-      return value;
-    };
+// Updated SerializationOptions interface to include Comparer and replacer
+interface SerializationOptions {
+  replacer?: Replacer;
+  space?: string | number;
+  cycles?: boolean;
+  comparer?: Comparer;
+}
 
-  const cmp =
-    opts.cmp &&
-    (function (f) {
-      return (node: any) => {
-        return (first: any, second: any): any => {
-          const firstObj = { key: first, value: node[first] };
-          const secondObj = { key: second, value: node[second] };
-          return f(firstObj, secondObj);
-        };
-      };
-    })(opts.cmp);
+// Utility function for indentation
+const getIndent = (space: string, level: number): string => `\n${new Array(level + 1).join(space)}`;
 
-  const seen: any[] = [];
+// Custom stringify function implementing the Comparer interface
+const customStringify = (
+  value: any,
+  replacer: Replacer,
+  space: string,
+  isCyclic: boolean,
+  comparer: Comparer | null,
+  level = 0,
+): string | undefined => {
+  const indent = getIndent(space, level);
+  const colonSeparator = space ? ': ' : ':';
 
-  const stringify = (parent: any, key: string | number, node: any, level: number): any => {
-    const indent = space ? `\n${new Array(level + 1).join(space)}` : '';
-    const colonSeparator = space ? ': ' : ':';
+  if (typeof value !== 'object' || value === null) return JSON.stringify(value);
 
-    if (node && node.toJSON && typeof node.toJSON === 'function') node = node.toJSON();
-
-    node = replacer.call(parent, key, node);
-
-    if (node === undefined) return;
-
-    if (typeof node !== 'object' || node === null) return JSON.stringify(node);
-
-    if (Array.isArray(node)) {
-      const out = [];
-      if (node.length === 0) return '[]';
-      for (let i = 0; i < node.length; i++) {
-        const item = stringify(node, i, node[i], level + 1) || JSON.stringify(null);
-        out.push(indent + space + item);
-      }
-      return `[${out.join(',')}${indent}]`;
-    } else {
-      if (seen.indexOf(node) !== -1) {
-        if (cycles) return JSON.stringify('__cycle__');
-        throw new TypeError('Converting circular structure to JSON');
-      } else seen.push(node);
-
-      const keys = Object.keys(node).sort(cmp && cmp(node));
-      const out = [];
-      for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-        const value = stringify(node, key, node[key], level + 1);
-
-        if (!value) continue;
-
-        const keyValue = JSON.stringify(key) + colonSeparator + value;
-        out.push(indent + space + keyValue);
-      }
-      seen.splice(seen.indexOf(node), 1);
-      return `{${out.join(',')}${indent}}`;
-    }
-  };
-
-  return stringify({ '': obj }, '', obj, 0);
+  if (Array.isArray(value)) return serializeArray(value, replacer, space, isCyclic, comparer, level);
+  else return serializeObject(value, replacer, space, isCyclic, comparer, level, indent, colonSeparator);
 };
+
+// Serialization for an array
+const serializeArray = (arr: any[], replacer: Replacer, space: string, isCyclic: boolean, comparer: Comparer | null, level: number): string => {
+  const items = arr.map(item => customStringify(item, replacer, space, isCyclic, comparer, level + 1) || JSON.stringify(null));
+  const indent = getIndent(space, level);
+  return `[${items.join(',')}${indent}]`;
+};
+
+// Serialization for an object
+const serializeObject = (
+  obj: any,
+  replacer: Replacer,
+  space: string,
+  isCyclic: boolean,
+  comparer: Comparer | null,
+  level: number,
+  indent: string,
+  colonSeparator: string,
+): string => {
+  const keys = comparer ? Object.keys(obj).sort(comparer) : Object.keys(obj);
+  const items = keys
+    .map(key => {
+      const value = customStringify(obj[key], replacer, space, isCyclic, comparer, level + 1);
+      return value ? `${JSON.stringify(key)}${colonSeparator}${value}` : undefined;
+    })
+    .filter(Boolean);
+  return `{${items.join(',')}${indent}}`;
+};
+
+// Main function to serialize with options, using Comparer and replacer types correctly
+const jsonStableStringify = (obj: any, options: SerializationOptions = {}): string => {
+  const { space = '', cycles = false, comparer = null } = options;
+  const replacer = options.replacer || ((key: any, value: any) => value);
+  const indentSpace = typeof space === 'number' ? ' '.repeat(space) : space;
+
+  return customStringify(obj, replacer, indentSpace, cycles, comparer);
+};
+
+// Conversion functions using the refactored stringify, with correct type applications
+const toJSON = (value: any, options?: SerializationOptions): string => jsonStableStringify(value, { ...options, space: 2 });
+const toObject = <Type = unknown>(text: string, reviver?: (key: string, value: any) => any): Type => JSON.parse(text, reviver);
+
+export { toJSON, toObject };
